@@ -1,10 +1,10 @@
 {
-  "name": "plugin-template",
+  "name": "plugin-dlt",
   "build": {
     "context": ".",
     "dockerfile": "Dockerfile"
   },
-  "workspaceFolder": "/workspaces/plugin-template",
+  "workspaceFolder": "/workspaces/plugin-dlt",
   "forwardPorts": [8080],
   "customizations": {
     "vscode": {

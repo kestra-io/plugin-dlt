@@ -15,6 +15,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @SuperBuilder
@@ -38,58 +39,44 @@ import java.util.List;
 
                 tasks:
                   - id: init
-                    type: io.kestra.plugin.dlt.cli.DLTCLI
+                    type: io.kestra.plugin.dlt.DltCLI
                     commands:
                       - dlt init rest_api duckdb
                 """
         ),
         @Example(
-            title = "Show pipeline information and save to file",
+            title = "Load a local JSON file into DuckDB",
             full = true,
             code = """
-                id: dlt_pipeline_info
+                id: dlt_local_file
                 namespace: company.team
 
                 tasks:
-                  - id: pipeline_info
-                    type: io.kestra.plugin.dlt.cli.DLTCLI
-                    outputFiles:
-                      - /tmp/pipeline-info.txt
-                    commands:
-                      - dlt pipeline my_pipeline info > /tmp/pipeline-info.txt
-                """
-        ),
-        @Example(
-            title = "Deploy a pipeline via GitHub Actions",
-            full = true,
-            code = """
-                id: dlt_deploy_github
-                namespace: company.team
+                  - id: working_dir
+                    type: io.kestra.plugin.core.flow.WorkingDirectory
+                    tasks:
+                      - id: init_local
+                        type: io.kestra.plugin.dlt.DltCLI
+                        containerImage: ghcr.io/kestra-io/dlt-runtime:local
+                        beforeCommands:
+                          - pip install pandas sqlalchemy
+                        commands:
+                          - dlt --non-interactive init local_file duckdb
+                          - echo '[{"name":"Alice","age":30},{"name":"Bob","age":25}]' > data.json
 
-                tasks:
-                  - id: deploy
-                    type: io.kestra.plugin.dlt.cli.DLTCLI
-                    commands:
-                      - dlt deploy my_pipeline.py github-action --schedule "0 9 * * *"
-                """
-        ),
-        @Example(
-            title = "Inspect pipeline traces",
-            full = true,
-            code = """
-                id: dlt_trace
-                namespace: company.team
-
-                tasks:
-                  - id: trace
-                    type: io.kestra.plugin.dlt.cli.DLTCLI
-                    commands:
-                      - dlt pipeline my_pipeline trace
+                      - id: run_local
+                        type: io.kestra.plugin.dlt.DltCLI
+                        containerImage: ghcr.io/kestra-io/dlt-runtime:local
+                        beforeCommands:
+                          - pip install pandas sqlalchemy
+                        commands:
+                          - python local_file_pipeline.py
                 """
         )
+
     }
 )
-public class DLTCLI extends AbstractExecScript implements RunnableTask<ScriptOutput>, NamespaceFilesInterface, InputFilesInterface, OutputFilesInterface {
+public class DltCLI extends AbstractExecScript implements RunnableTask<ScriptOutput>, NamespaceFilesInterface, InputFilesInterface, OutputFilesInterface {
     private static final String DEFAULT_IMAGE = "ghcr.io/kestra-io/dlt";
 
     @Schema(
@@ -118,11 +105,30 @@ public class DLTCLI extends AbstractExecScript implements RunnableTask<ScriptOut
     public ScriptOutput run(RunContext runContext) throws Exception {
         TargetOS os = runContext.render(this.targetOS).as(TargetOS.class).orElse(null);
 
+        List<String> commands = runContext.render(this.commands).asList(String.class);
+        List<String> processedCommands = new ArrayList<>();
+
+        // Process each command
+        for (String raw : commands) {
+            String c = raw.trim();
+
+            // Ensure top-level non-interactive for ALL dlt commands
+            if (c.startsWith("dlt ") && !c.contains("--non-interactive")) {
+                c = c.replaceFirst("^dlt\\b", "dlt --non-interactive");
+            }
+            processedCommands.add(c);
+
+            // After 'dlt init ...', install generated deps if present
+            if (c.matches("^dlt --non-interactive\\s+init\\b.*")) {
+                processedCommands.add("if [ -f requirements.txt ]; then pip install -r requirements.txt; fi");
+            }
+        }
+
         return this.commands(runContext)
             .withInterpreter(this.interpreter)
             .withBeforeCommands(beforeCommands)
             .withBeforeCommandsWithOptions(true)
-            .withCommands(commands)
+            .withCommands(Property.ofValue(processedCommands))
             .withTargetOS(os)
             .run();
     }

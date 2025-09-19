@@ -24,7 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 @KestraTest
-public class DLTCLITest {
+public class DltCLITest {
 
     @Inject
     RunContextFactory runContextFactory;
@@ -38,10 +38,9 @@ public class DLTCLITest {
         List<LogEntry> logs = new CopyOnWriteArrayList<>();
         Flux<LogEntry> receive = TestsUtils.receive(logQueue, l -> logs.add(l.getLeft()));
 
-        var dltDLTCLI = DLTCLI.builder()
-            .id("dlt-DLTCLI-" + UUID.randomUUID())
-            .type(DLTCLI.class.getName())
-            .beforeCommands(Property.ofValue(List.of("pip install dlt[duckdb]")))
+        var dltDltCLI = DltCLI.builder()
+            .id("dlt-DltCLI-" + UUID.randomUUID())
+            .type(DltCLI.class.getName())
             .commands(Property.ofValue(List.of("python pipeline.py")))
             .inputFiles(Map.of("pipeline.py", """
                 import dlt
@@ -62,8 +61,8 @@ public class DLTCLITest {
                 """))
             .build();
 
-        RunContext runContext = TestsUtils.mockRunContext(runContextFactory, dltDLTCLI, ImmutableMap.of());
-        ScriptOutput run = dltDLTCLI.run(runContext);
+        RunContext runContext = TestsUtils.mockRunContext(runContextFactory, dltDltCLI, ImmutableMap.of());
+        ScriptOutput run = dltDltCLI.run(runContext);
 
         assertThat(run.getExitCode(), is(0));
 
@@ -77,17 +76,17 @@ public class DLTCLITest {
         List<LogEntry> logs = new CopyOnWriteArrayList<>();
         Flux<LogEntry> receive = TestsUtils.receive(logQueue, l -> logs.add(l.getLeft()));
 
-        var dltDLTCLI = DLTCLI.builder()
+        var dltDltCLI = DltCLI.builder()
             .id("dlt-init-" + UUID.randomUUID())
-            .type(DLTCLI.class.getName())
+            .type(DltCLI.class.getName())
             .commands(Property.ofValue(List.of(
-                "dlt --non-interactive init rest_api duckdb",
+                "dlt init rest_api duckdb",
                 "echo 'DLT project initialized successfully!'"
             )))
             .build();
 
-        RunContext runContext = TestsUtils.mockRunContext(runContextFactory, dltDLTCLI, ImmutableMap.of());
-        ScriptOutput run = dltDLTCLI.run(runContext);
+        RunContext runContext = TestsUtils.mockRunContext(runContextFactory, dltDltCLI, ImmutableMap.of());
+        ScriptOutput run = dltDltCLI.run(runContext);
 
         assertThat(run.getExitCode(), is(0));
 
@@ -101,17 +100,17 @@ public class DLTCLITest {
         List<LogEntry> logs = new CopyOnWriteArrayList<>();
         Flux<LogEntry> receive = TestsUtils.receive(logQueue, l -> logs.add(l.getLeft()));
 
-        var dltDLTCLI = DLTCLI.builder()
+        var dltDltCLI = DltCLI.builder()
             .id("dlt-version-" + UUID.randomUUID())
-            .type(DLTCLI.class.getName())
+            .type(DltCLI.class.getName())
             .commands(Property.ofValue(List.of(
                 "dlt --version",
                 "echo 'DLT version check completed!'"
             )))
             .build();
 
-        RunContext runContext = TestsUtils.mockRunContext(runContextFactory, dltDLTCLI, ImmutableMap.of());
-        ScriptOutput run = dltDLTCLI.run(runContext);
+        RunContext runContext = TestsUtils.mockRunContext(runContextFactory, dltDltCLI, ImmutableMap.of());
+        ScriptOutput run = dltDltCLI.run(runContext);
 
         assertThat(run.getExitCode(), is(0));
 

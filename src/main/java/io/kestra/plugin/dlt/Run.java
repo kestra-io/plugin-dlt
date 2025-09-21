@@ -40,8 +40,7 @@ import java.util.Map;
                   - id: load_zendesk
                     type: io.kestra.plugin.dlt.Run
                     beforeCommands:
-                      - dlt --non-interactive init zendesk duckdb
-                    containerImage: ghcr.io/kestra-io/dlt-runtime:local
+                      - dlt init zendesk duckdb
                     env:
                       SOURCES__ZENDESK__ZENDESK_SUPPORT__CREDENTIALS__EMAIL: "mdewangan@kestra.io/token"
                       SOURCES__ZENDESK__ZENDESK_SUPPORT__CREDENTIALS__PASSWORD: "a2We5PKk7ByRLItk7RR4BcpQ8PWUbnUVa1uJ9TRt"
@@ -83,9 +82,6 @@ import java.util.Map;
 
                       - id: run_csv
                         type: io.kestra.plugin.dlt.Run
-                        containerImage: ghcr.io/kestra-io/dlt-runtime:local
-                        beforeCommands:
-                           - pip install pandas
                         script: |
                           import dlt
                           import pandas as pd

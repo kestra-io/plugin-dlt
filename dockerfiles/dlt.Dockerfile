@@ -13,8 +13,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       git ca-certificates curl gcc build-essential \
  && rm -rf /var/lib/apt/lists/*
 
-RUN pip install uv && uv pip install --system "dlt[duckdb,cli,workspace]==1.16.0" websockets>=14.2.0 requests
-
+RUN pip install uv && uv pip install --system "dlt[duckdb,cli]" \
+    requests \
+    pandas \
+    pyarrow \
+    sqlalchemy \
+    fastparquet
 
 ENTRYPOINT ["/bin/sh","-c"]
 CMD ["python --version"]

@@ -18,7 +18,6 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +40,6 @@ import java.util.Map;
                   - id: load_zendesk
                     type: io.kestra.plugin.dlt.Run
                     beforeCommands:
-                      - pip install dlt[duckdb]
                       - dlt --non-interactive init zendesk duckdb
                     containerImage: ghcr.io/kestra-io/dlt-runtime:local
                     env:
@@ -62,6 +60,46 @@ import java.util.Map;
                       load_info = pipeline.run(zendesk_support(load_all=False).tickets)
                       print(f"Loaded: {load_info}")
 
+                """
+        ),
+        @Example(
+            title = "Load a local CSV file and ingest it into DuckDB.",
+            full = true,
+            code = """
+                id: dlt_csv
+                namespace: company.team
+
+                tasks:
+                  - id: working_dir
+                    type: io.kestra.plugin.core.flow.WorkingDirectory
+
+                    tasks:
+                      - id: prepare_file
+                        type: io.kestra.plugin.dlt.DltCLI
+                        commands:
+                          - echo "id,name,score" > data.csv
+                          - echo "1,Alice,90" >> data.csv
+                          - echo "2,Bob,85" >> data.csv
+
+                      - id: run_csv
+                        type: io.kestra.plugin.dlt.Run
+                        containerImage: ghcr.io/kestra-io/dlt-runtime:local
+                        beforeCommands:
+                           - pip install pandas
+                        script: |
+                          import dlt
+                          import pandas as pd
+
+                          df = pd.read_csv("data.csv")
+
+                          pipeline = dlt.pipeline(
+                              "csv_pipeline",
+                              destination="duckdb",
+                              dataset_name="csv_data"
+                          )
+
+                          info = pipeline.run(df.to_dict(orient="records"), table_name="scores")
+                          print(info)
                 """
         )
     }

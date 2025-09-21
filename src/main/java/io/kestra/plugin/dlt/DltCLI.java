@@ -65,7 +65,7 @@ import java.util.List;
                       - id: run_local
                         type: io.kestra.plugin.dlt.DltCLI
                         beforeCommands:
-                          - pip install pandas pyarrow fastparquet sqlalchemy pymysql
+                          - pip install pymysql
                         commands:
                           - python local_file_pipeline.py
                 """

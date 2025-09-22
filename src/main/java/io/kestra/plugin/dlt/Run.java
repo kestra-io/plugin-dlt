@@ -42,9 +42,9 @@ import java.util.Map;
                     beforeCommands:
                       - dlt init zendesk duckdb
                     env:
-                      SOURCES__ZENDESK__ZENDESK_SUPPORT__CREDENTIALS__EMAIL: "mdewangan@kestra.io/token"
-                      SOURCES__ZENDESK__ZENDESK_SUPPORT__CREDENTIALS__PASSWORD: "a2We5PKk7ByRLItk7RR4BcpQ8PWUbnUVa1uJ9TRt"
-                      SOURCES__ZENDESK__ZENDESK_SUPPORT__CREDENTIALS__SUBDOMAIN: "kestrasupport"
+                      SOURCES__ZENDESK__ZENDESK_SUPPORT__CREDENTIALS__EMAIL: "{{ secret('ZENDESK_EMAIL') }}"
+                      SOURCES__ZENDESK__ZENDESK_SUPPORT__CREDENTIALS__PASSWORD: "{{ secret('ZENDESK_PASSWORD') }}"
+                      SOURCES__ZENDESK__ZENDESK_SUPPORT__CREDENTIALS__SUBDOMAIN: "{{ secret('ZENDESK_SUBDOMAIN') }}"
                     outputFiles:
                       - "zendesk_pipeline.duckdb"
                     script: |
@@ -58,7 +58,6 @@ import java.util.Map;
                       )
                       load_info = pipeline.run(zendesk_support(load_all=False).tickets)
                       print(f"Loaded: {load_info}")
-
                 """
         ),
         @Example(

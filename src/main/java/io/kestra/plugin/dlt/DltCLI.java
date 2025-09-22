@@ -15,6 +15,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @SuperBuilder
@@ -38,58 +39,64 @@ import java.util.List;
 
                 tasks:
                   - id: init
-                    type: io.kestra.plugin.dlt.cli.DLTCLI
+                    type: io.kestra.plugin.dlt.DltCLI
                     commands:
                       - dlt init rest_api duckdb
                 """
         ),
         @Example(
-            title = "Show pipeline information and save to file",
+            title = "Load a local JSON file into DuckDB",
             full = true,
             code = """
-                id: dlt_pipeline_info
+                id: dlt_local_duckdb_query
                 namespace: company.team
 
                 tasks:
-                  - id: pipeline_info
-                    type: io.kestra.plugin.dlt.cli.DLTCLI
-                    outputFiles:
-                      - /tmp/pipeline-info.txt
-                    commands:
-                      - dlt pipeline my_pipeline info > /tmp/pipeline-info.txt
+                  - id: working_dir
+                    type: io.kestra.plugin.core.flow.WorkingDirectory
+
+                    tasks:
+                      - id: init_local
+                        type: io.kestra.plugin.dlt.DltCLI
+                        commands:
+                          - dlt init local_file duckdb
+                          - echo '[{"name":"Alice","age":30},{"name":"Bob","age":25},{"name":"Alice","age":35}]' > data.json
+
+                      - id: run_local
+                        type: io.kestra.plugin.dlt.DltCLI
+                        beforeCommands:
+                          - pip install pymysql
+                        commands:
+                          - python local_file_pipeline.py
                 """
         ),
         @Example(
-            title = "Deploy a pipeline via GitHub Actions",
+            title = "Run and trace a Chess API pipeline",
             full = true,
             code = """
-                id: dlt_deploy_github
+                id: dlt_chess_demo
                 namespace: company.team
 
                 tasks:
-                  - id: deploy
-                    type: io.kestra.plugin.dlt.cli.DLTCLI
-                    commands:
-                      - dlt deploy my_pipeline.py github-action --schedule "0 9 * * *"
-                """
-        ),
-        @Example(
-            title = "Inspect pipeline traces",
-            full = true,
-            code = """
-                id: dlt_trace
-                namespace: company.team
+                  - id: working_dir
+                    type: io.kestra.plugin.core.flow.WorkingDirectory
 
-                tasks:
-                  - id: trace
-                    type: io.kestra.plugin.dlt.cli.DLTCLI
-                    commands:
-                      - dlt pipeline my_pipeline trace
+                    tasks:
+                      - id: init_pipeline
+                        type: io.kestra.plugin.dlt.DltCLI
+                        commands:
+                          - dlt init chess duckdb
+
+                      - id: run_pipeline
+                        type: io.kestra.plugin.dlt.DltCLI
+                        commands:
+                          - python chess_pipeline.py
+                          - dlt pipeline chess_pipeline trace
                 """
         )
     }
 )
-public class DLTCLI extends AbstractExecScript implements RunnableTask<ScriptOutput>, NamespaceFilesInterface, InputFilesInterface, OutputFilesInterface {
+public class DltCLI extends AbstractExecScript implements RunnableTask<ScriptOutput>, NamespaceFilesInterface, InputFilesInterface, OutputFilesInterface {
     private static final String DEFAULT_IMAGE = "ghcr.io/kestra-io/dlt";
 
     @Schema(
@@ -118,11 +125,28 @@ public class DLTCLI extends AbstractExecScript implements RunnableTask<ScriptOut
     public ScriptOutput run(RunContext runContext) throws Exception {
         TargetOS os = runContext.render(this.targetOS).as(TargetOS.class).orElse(null);
 
+        List<String> processedCommands = runContext.render(this.commands).asList(String.class).stream()
+            .map(String::trim)
+            .flatMap(command -> {
+                List<String> out = new ArrayList<>();
+
+                if (command.startsWith("dlt ") && !command.contains("--non-interactive")) {
+                    command = command.replaceFirst("^dlt\\b", "dlt --non-interactive");
+                }
+                out.add(command);
+
+                if (command.matches("^dlt --non-interactive\\s+init\\b.*")) {
+                    out.add("if [ -f requirements.txt ]; then pip install -r requirements.txt; fi");
+                }
+                return out.stream();
+            })
+            .toList();
+
         return this.commands(runContext)
             .withInterpreter(this.interpreter)
             .withBeforeCommands(beforeCommands)
             .withBeforeCommandsWithOptions(true)
-            .withCommands(commands)
+            .withCommands(Property.ofValue(processedCommands))
             .withTargetOS(os)
             .run();
     }

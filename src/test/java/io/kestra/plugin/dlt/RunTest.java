@@ -81,14 +81,12 @@ public class RunTest {
         Run dltRun = Run.builder()
             .id("dlt-run-packages-" + UUID.randomUUID())
             .type(Run.class.getName())
-            .installPackages(Property.ofValue(List.of("requests", "dlt[duckdb]")))
             .script(Property.ofValue("""
                 import dlt
-                import requests  # Should be available after installation
+                import requests
 
                 @dlt.resource
                 def api_data():
-                    # Mock API response
                     return [{"status": "success", "message": "DLT with packages works!"}]
 
                 pipeline = dlt.pipeline(

@@ -40,7 +40,7 @@ import java.util.Map;
                   - id: load_zendesk
                     type: io.kestra.plugin.dlt.Run
                     beforeCommands:
-                      - dlt init zendesk duckdb
+                      - dlt --non-interactive init zendesk duckdb
                     env:
                       SOURCES__ZENDESK__ZENDESK_SUPPORT__CREDENTIALS__EMAIL: "{{ secret('ZENDESK_EMAIL') }}"
                       SOURCES__ZENDESK__ZENDESK_SUPPORT__CREDENTIALS__PASSWORD: "{{ secret('ZENDESK_PASSWORD') }}"

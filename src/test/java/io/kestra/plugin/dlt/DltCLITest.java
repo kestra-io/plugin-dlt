@@ -38,7 +38,7 @@ public class DltCLITest {
         List<LogEntry> logs = new CopyOnWriteArrayList<>();
         Flux<LogEntry> receive = TestsUtils.receive(logQueue, l -> logs.add(l.getLeft()));
 
-        var dltDltCLI = DltCLI.builder()
+        var dltCLI = DltCLI.builder()
             .id("dlt-DltCLI-" + UUID.randomUUID())
             .type(DltCLI.class.getName())
             .commands(Property.ofValue(List.of("python pipeline.py")))
@@ -61,8 +61,8 @@ public class DltCLITest {
                 """))
             .build();
 
-        RunContext runContext = TestsUtils.mockRunContext(runContextFactory, dltDltCLI, ImmutableMap.of());
-        ScriptOutput run = dltDltCLI.run(runContext);
+        RunContext runContext = TestsUtils.mockRunContext(runContextFactory, dltCLI, ImmutableMap.of());
+        ScriptOutput run = dltCLI.run(runContext);
 
         assertThat(run.getExitCode(), is(0));
 
@@ -76,7 +76,7 @@ public class DltCLITest {
         List<LogEntry> logs = new CopyOnWriteArrayList<>();
         Flux<LogEntry> receive = TestsUtils.receive(logQueue, l -> logs.add(l.getLeft()));
 
-        var dltDltCLI = DltCLI.builder()
+        var dltCLI = DltCLI.builder()
             .id("dlt-init-" + UUID.randomUUID())
             .type(DltCLI.class.getName())
             .commands(Property.ofValue(List.of(
@@ -85,8 +85,8 @@ public class DltCLITest {
             )))
             .build();
 
-        RunContext runContext = TestsUtils.mockRunContext(runContextFactory, dltDltCLI, ImmutableMap.of());
-        ScriptOutput run = dltDltCLI.run(runContext);
+        RunContext runContext = TestsUtils.mockRunContext(runContextFactory, dltCLI, ImmutableMap.of());
+        ScriptOutput run = dltCLI.run(runContext);
 
         assertThat(run.getExitCode(), is(0));
 
@@ -100,7 +100,7 @@ public class DltCLITest {
         List<LogEntry> logs = new CopyOnWriteArrayList<>();
         Flux<LogEntry> receive = TestsUtils.receive(logQueue, l -> logs.add(l.getLeft()));
 
-        var dltDltCLI = DltCLI.builder()
+        var dltCLI = DltCLI.builder()
             .id("dlt-version-" + UUID.randomUUID())
             .type(DltCLI.class.getName())
             .commands(Property.ofValue(List.of(
@@ -109,8 +109,8 @@ public class DltCLITest {
             )))
             .build();
 
-        RunContext runContext = TestsUtils.mockRunContext(runContextFactory, dltDltCLI, ImmutableMap.of());
-        ScriptOutput run = dltDltCLI.run(runContext);
+        RunContext runContext = TestsUtils.mockRunContext(runContextFactory, dltCLI, ImmutableMap.of());
+        ScriptOutput run = dltCLI.run(runContext);
 
         assertThat(run.getExitCode(), is(0));
 

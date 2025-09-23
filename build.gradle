@@ -29,7 +29,7 @@ java {
 }
 
 group = "io.kestra.plugin"
-description = 'Plugin DLT for Kestra'
+description = 'Plugin Dlt for Kestra'
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
@@ -175,7 +175,7 @@ jar {
     manifest {
         attributes(
                 "X-Kestra-Name": project.name,
-                "X-Kestra-Title": "DLT (Data load tool)",
+                "X-Kestra-Title": "Dlt",
                 "X-Kestra-Group": project.group + ".dlt",
                 "X-Kestra-Description": project.description,
                 "X-Kestra-Version": project.version

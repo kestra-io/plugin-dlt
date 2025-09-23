@@ -39,7 +39,7 @@ import java.util.List;
 
                 tasks:
                   - id: init
-                    type: io.kestra.plugin.dlt.DltCLI
+                    type: io.kestra.plugin.dlt.CLI
                     commands:
                       - dlt init rest_api duckdb
                 """
@@ -67,14 +67,14 @@ import java.util.List;
 
                 tasks:
                   - id: run
-                    type: io.kestra.plugin.dlt.DltCLI
+                    type: io.kestra.plugin.dlt.CLI
                     beforeCommands:
                       - pip install dlt[duckdb]>=1.16.0
                     commands:
                       - python rest_api.py
                     outputFiles:
                       - "{{inputs.pipeline_name}}.duckdb"
-                    inputFiles: 
+                    inputFiles:
                       rest_api.py: |
                         import dlt
                         from dlt.sources.rest_api import rest_api_source
@@ -128,12 +128,12 @@ import java.util.List;
 
                     tasks:
                       - id: init_pipeline
-                        type: io.kestra.plugin.dlt.DltCLI
+                        type: io.kestra.plugin.dlt.CLI
                         commands:
                           - dlt init chess duckdb
 
                       - id: run_pipeline
-                        type: io.kestra.plugin.dlt.DltCLI
+                        type: io.kestra.plugin.dlt.CLI
                         commands:
                           - python chess_pipeline.py
                           - dlt pipeline chess_pipeline trace
@@ -141,7 +141,7 @@ import java.util.List;
         )
     }
 )
-public class DltCLI extends AbstractExecScript implements RunnableTask<ScriptOutput>, NamespaceFilesInterface, InputFilesInterface, OutputFilesInterface {
+public class CLI extends AbstractExecScript implements RunnableTask<ScriptOutput>, NamespaceFilesInterface, InputFilesInterface, OutputFilesInterface {
     private static final String DEFAULT_IMAGE = "ghcr.io/kestra-io/dlt";
 
     @Schema(

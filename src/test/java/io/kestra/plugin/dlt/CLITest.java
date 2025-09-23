@@ -24,7 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 @KestraTest
-public class DltCLITest {
+public class CLITest {
 
     @Inject
     RunContextFactory runContextFactory;
@@ -38,9 +38,9 @@ public class DltCLITest {
         List<LogEntry> logs = new CopyOnWriteArrayList<>();
         Flux<LogEntry> receive = TestsUtils.receive(logQueue, l -> logs.add(l.getLeft()));
 
-        var dltCLI = DltCLI.builder()
-            .id("dlt-DltCLI-" + UUID.randomUUID())
-            .type(DltCLI.class.getName())
+        var dltCLI = CLI.builder()
+            .id("dlt-CLI-" + UUID.randomUUID())
+            .type(CLI.class.getName())
             .commands(Property.ofValue(List.of("python pipeline.py")))
             .inputFiles(Map.of("pipeline.py", """
                 import dlt
@@ -76,9 +76,9 @@ public class DltCLITest {
         List<LogEntry> logs = new CopyOnWriteArrayList<>();
         Flux<LogEntry> receive = TestsUtils.receive(logQueue, l -> logs.add(l.getLeft()));
 
-        var dltCLI = DltCLI.builder()
+        var dltCLI = CLI.builder()
             .id("dlt-init-" + UUID.randomUUID())
-            .type(DltCLI.class.getName())
+            .type(CLI.class.getName())
             .commands(Property.ofValue(List.of(
                 "dlt init rest_api duckdb",
                 "echo 'DLT project initialized successfully!'"
@@ -100,9 +100,9 @@ public class DltCLITest {
         List<LogEntry> logs = new CopyOnWriteArrayList<>();
         Flux<LogEntry> receive = TestsUtils.receive(logQueue, l -> logs.add(l.getLeft()));
 
-        var dltCLI = DltCLI.builder()
+        var dltCLI = CLI.builder()
             .id("dlt-version-" + UUID.randomUUID())
-            .type(DltCLI.class.getName())
+            .type(CLI.class.getName())
             .commands(Property.ofValue(List.of(
                 "dlt --version",
                 "echo 'DLT version check completed!'"

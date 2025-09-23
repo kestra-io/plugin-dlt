@@ -30,7 +30,45 @@ import java.util.Map;
 @Plugin(
     examples = {
         @Example(
-            title = "Run a dlt Zendesk pipeline to DuckDB",
+            title = "Load a local CSV file and ingest it into DuckDB, then query it.",
+            full = true,
+            code = """
+                id: dlt_csv_to_duckdb
+                namespace: company.team
+
+                tasks:
+                  - id: run_csv
+                    type: io.kestra.plugin.dlt.Run
+                    beforeCommands:
+                      - echo "id,name,score" > data.csv
+                      - echo "1,Alice,90" >> data.csv
+                      - echo "2,Bob,85" >> data.csv
+                    outputFiles:
+                      - "csv_pipeline.duckdb"
+                    script: |
+                      import dlt
+                      import pandas as pd
+
+                      df = pd.read_csv("data.csv")
+
+                      pipeline = dlt.pipeline(
+                          pipeline_name="csv_pipeline",
+                          destination="duckdb",
+                          dataset_name="csv_data"
+                      )
+
+                      info = pipeline.run(df.to_dict(orient="records"), table_name="scores")
+                      print(info)
+
+                  - id: duckdb
+                    type: io.kestra.plugin.jdbc.duckdb.Query
+                    databaseUri: "{{outputs.run_csv.outputFiles['csv_pipeline.duckdb']}}"
+                    sql: SELECT * FROM csv_data.scores;
+                    store: true
+                """
+        ),
+        @Example(
+            title = "Run a dlt pipeline to extract data from a Zendesk API and load it into a DuckDB database.",
             full = true,
             code = """
                 id: run_script
@@ -52,51 +90,14 @@ import java.util.Map;
                       from zendesk import zendesk_support
 
                       pipeline = dlt.pipeline(
-                          "zendesk_pipeline",
+                          pipeline_name="zendesk_pipeline",
                           destination="duckdb",
                           dataset_name="zendesk_data"
                       )
                       load_info = pipeline.run(zendesk_support(load_all=False).tickets)
                       print(f"Loaded: {load_info}")
                 """
-        ),
-        @Example(
-            title = "Load a local CSV file and ingest it into DuckDB.",
-            full = true,
-            code = """
-                id: dlt_csv
-                namespace: company.team
-
-                tasks:
-                  - id: working_dir
-                    type: io.kestra.plugin.core.flow.WorkingDirectory
-
-                    tasks:
-                      - id: prepare_file
-                        type: io.kestra.plugin.dlt.DltCLI
-                        commands:
-                          - echo "id,name,score" > data.csv
-                          - echo "1,Alice,90" >> data.csv
-                          - echo "2,Bob,85" >> data.csv
-
-                      - id: run_csv
-                        type: io.kestra.plugin.dlt.Run
-                        script: |
-                          import dlt
-                          import pandas as pd
-
-                          df = pd.read_csv("data.csv")
-
-                          pipeline = dlt.pipeline(
-                              "csv_pipeline",
-                              destination="duckdb",
-                              dataset_name="csv_data"
-                          )
-
-                          info = pipeline.run(df.to_dict(orient="records"), table_name="scores")
-                          print(info)
-                """
-        )
+        )        
     }
 )
 public class Run extends AbstractExecScript implements RunnableTask<ScriptOutput> {

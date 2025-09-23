@@ -24,8 +24,8 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Execute dlt (data load tool) commands to extract, transform and load data from various sources.",
-    description = "dlt is an open-source Python library that loads data from various, often messy data sources into well-structured, live datasets. " +
+    title = "Execute dlt (data load tool) commands to extract and load data from various sources.",
+    description = "dlt is an open-source Python library that loads data from various data sources into well-structured datasets. " +
         "It offers a lightweight interface for extracting data from REST APIs, SQL databases, cloud storage, Python data structures, and many more."
 )
 @Plugin(
@@ -45,29 +45,74 @@ import java.util.List;
                 """
         ),
         @Example(
-            title = "Load a local JSON file into DuckDB",
+            title = "Run a parametrized dlt pipeline extracting data from a REST API, load it into a DuckDB database and then query it.",
             full = true,
             code = """
-                id: dlt_local_duckdb_query
+                id: dlt_rest_api_duckdb
                 namespace: company.team
 
+                inputs:
+                  - id: pipeline_name
+                    type: STRING
+                    defaults: rest_api_pokemon
+
+                  - id: dataset_name
+                    type: STRING
+                    defaults: pokemon
+
+                  - id: resources
+                    type: ARRAY
+                    itemType: STRING
+                    defaults: ["pokemon", "berry", "location"]
+
                 tasks:
-                  - id: working_dir
-                    type: io.kestra.plugin.core.flow.WorkingDirectory
+                  - id: run
+                    type: io.kestra.plugin.dlt.DltCLI
+                    beforeCommands:
+                      - pip install dlt[duckdb]>=1.16.0
+                    commands:
+                      - python rest_api.py
+                    outputFiles:
+                      - "{{inputs.pipeline_name}}.duckdb"
+                    inputFiles: 
+                      rest_api.py: |
+                        import dlt
+                        from dlt.sources.rest_api import rest_api_source
 
-                    tasks:
-                      - id: init_local
-                        type: io.kestra.plugin.dlt.DltCLI
-                        commands:
-                          - dlt init local_file duckdb
-                          - echo '[{"name":"Alice","age":30},{"name":"Bob","age":25},{"name":"Alice","age":35}]' > data.json
+                        def load_pokemon() -> None:
+                            pipeline = dlt.pipeline(
+                                pipeline_name="{{inputs.pipeline_name}}",
+                                destination='duckdb',
+                                dataset_name="{{inputs.dataset_name}}",
+                            )
+                            pokemon_source = rest_api_source(
+                                {
+                                    "client": {
+                                        "base_url": "https://pokeapi.co/api/v2/",
+                                        "paginator": "json_link",
+                                    },
+                                    "resource_defaults": {
+                                        "endpoint": {
+                                            "params": {
+                                                "limit": 1000,
+                                            },
+                                        },
+                                    },
+                                    "resources": {{inputs.resources}},
+                                }
+                            )
 
-                      - id: run_local
-                        type: io.kestra.plugin.dlt.DltCLI
-                        beforeCommands:
-                          - pip install pymysql
-                        commands:
-                          - python local_file_pipeline.py
+                            load_info = pipeline.run(pokemon_source)
+                            print(load_info)
+
+                        if __name__ == "__main__":
+                            load_pokemon()
+
+                  - id: duckdb
+                    type: io.kestra.plugin.jdbc.duckdb.Query
+                    databaseUri: "{{ outputs.run.outputFiles[inputs.pipeline_name ~ '.duckdb']}}"
+                    sql: SELECT distinct name, url FROM {{inputs.dataset_name}}.pokemon;
+                    store: true
                 """
         ),
         @Example(

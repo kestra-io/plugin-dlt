@@ -33,7 +33,7 @@
 <p align="center" style="color:grey;"><i>Get started with Kestra in 4 minutes.</i></p>
 
 
-# Kestra DLT Pugin
+# Kestra DLT Plugin
 
 > This plugin integrates [dlt (data load tool)](https://dlthub.com) with Kestra.
 

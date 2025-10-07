@@ -106,7 +106,7 @@ public class Run extends AbstractExecScript implements RunnableTask<ScriptOutput
     @Builder.Default
     protected Property<String> containerImage = Property.ofValue(DEFAULT_IMAGE);
 
-    @Schema(title = "Inline script to execute.")
+    @Schema(title = "Inline script to execute")
     @NotNull
     protected Property<String> script;
 

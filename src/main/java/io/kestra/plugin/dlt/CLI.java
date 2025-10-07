@@ -24,7 +24,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Execute dlt (data load tool) commands to extract and load data from various sources.",
+    title = "Execute dlt (data load tool) commands to extract, and load data from various sources.",
     description = "dlt is an open-source Python library that loads data from various data sources into well-structured datasets. " +
         "It offers a lightweight interface for extracting data from REST APIs, SQL databases, cloud storage, Python data structures, and many more."
 )
@@ -45,7 +45,7 @@ import java.util.List;
                 """
         ),
         @Example(
-            title = "Run a parametrized dlt pipeline extracting data from a REST API, load it into a DuckDB database and then query it.",
+            title = "Run a parametrized dlt pipeline extracting data from a REST API, load it into a DuckDB database, and then query it.",
             full = true,
             code = """
                 id: dlt_rest_api_duckdb
@@ -145,7 +145,7 @@ public class CLI extends AbstractExecScript implements RunnableTask<ScriptOutput
     private static final String DEFAULT_IMAGE = "ghcr.io/kestra-io/dlt";
 
     @Schema(
-        title = "The dlt commands to run.",
+        title = "The dlt commands to run",
         description = "List of dlt CLI commands to execute. Common commands include 'dlt init', 'dlt pipeline', 'dlt deploy', etc."
     )
     @NotNull

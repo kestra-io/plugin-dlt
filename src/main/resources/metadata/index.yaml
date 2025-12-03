@@ -1,8 +1,8 @@
 group: io.kestra.plugin.dlt
 name: "dlt"
 title: "Dlt"
-description: "This sub-group of plugins contains tasks to interact with dlt (data load tool). dlt is an open-source library for declaratively loading data from APIs, databases, and files into data warehouses and lakes."
-body: ""
+description: "Tasks that run dlt (data load tool) pipelines and CLI commands to move data into analytics destinations."
+body: "Use these tasks to execute dlt workloads either from inline Python (`Run`) or through non-interactive CLI commands (`CLI`). Provide a Python `script` or list of `commands`, set `beforeCommands` to install dependencies, and adjust the default `ghcr.io/kestra-io/dlt` image when you need custom environments; the CLI task also auto-adds `--non-interactive` and installs `requirements.txt` after `dlt init`."
 videos: []
 createdBy: "Kestra Core Team"
 managedBy: "Kestra Core Team"

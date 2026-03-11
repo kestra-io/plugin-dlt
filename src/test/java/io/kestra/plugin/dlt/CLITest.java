@@ -1,6 +1,14 @@
 package io.kestra.plugin.dlt;
 
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.junit.jupiter.api.Test;
+
 import com.google.common.collect.ImmutableMap;
+
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.executions.LogEntry;
 import io.kestra.core.models.property.Property;
@@ -10,15 +18,10 @@ import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.utils.TestsUtils;
 import io.kestra.plugin.scripts.exec.scripts.models.ScriptOutput;
+
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -79,10 +82,14 @@ public class CLITest {
         var dltCLI = CLI.builder()
             .id("dlt-init-" + UUID.randomUUID())
             .type(CLI.class.getName())
-            .commands(Property.ofValue(List.of(
-                "dlt init rest_api duckdb",
-                "echo 'DLT project initialized successfully!'"
-            )))
+            .commands(
+                Property.ofValue(
+                    List.of(
+                        "dlt init rest_api duckdb",
+                        "echo 'DLT project initialized successfully!'"
+                    )
+                )
+            )
             .build();
 
         RunContext runContext = TestsUtils.mockRunContext(runContextFactory, dltCLI, ImmutableMap.of());
@@ -103,10 +110,14 @@ public class CLITest {
         var dltCLI = CLI.builder()
             .id("dlt-version-" + UUID.randomUUID())
             .type(CLI.class.getName())
-            .commands(Property.ofValue(List.of(
-                "dlt --version",
-                "echo 'DLT version check completed!'"
-            )))
+            .commands(
+                Property.ofValue(
+                    List.of(
+                        "dlt --version",
+                        "echo 'DLT version check completed!'"
+                    )
+                )
+            )
             .build();
 
         RunContext runContext = TestsUtils.mockRunContext(runContextFactory, dltCLI, ImmutableMap.of());

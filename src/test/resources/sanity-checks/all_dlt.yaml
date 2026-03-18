@@ -1,0 +1,46 @@
+id: all_dlt
+namespace: sanitychecks.plugin-dlt
+
+tasks:
+  - id: dlt_cli
+    type: io.kestra.plugin.dlt.CLI
+    outputFiles:
+      - dlt_version.txt
+    commands:
+      - dlt --version > dlt_version.txt
+
+  - id: dlt_run
+    type: io.kestra.plugin.dlt.Run
+    outputFiles:
+      - kestra_sanity.duckdb
+    script: |
+      import dlt
+
+      @dlt.resource
+      def products():
+          return [
+              {"id": 1, "name": "Kestra", "kind": "orchestrator"},
+              {"id": 2, "name": "dlt", "kind": "runtime"}
+          ]
+
+      pipeline = dlt.pipeline(
+          pipeline_name="kestra_sanity",
+          destination="duckdb",
+          dataset_name="sanity"
+      )
+      info = pipeline.run([products()])
+      print(f"loaded={len(info.loads_ids)}")
+
+  - id: assert
+    type: io.kestra.plugin.core.execution.Assert
+    conditions:
+      - "{{ outputs.dlt_cli.exitCode == 0 }}"
+      - "{{ outputs.dlt_cli.outputFiles['dlt_version.txt'] is not null }}"
+      - "{{ read(outputs.dlt_cli.outputFiles['dlt_version.txt']) contains 'dlt' }}"
+      - "{{ outputs.dlt_run.exitCode == 0 }}"
+      - "{{ outputs.dlt_run.outputFiles['kestra_sanity.duckdb'] is not null }}"
+      - "{{ read(outputs.dlt_cli.outputFiles['dlt_version.txt']) | length > 0 }}"
+
+finally:
+  - id: purge
+    type: io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles

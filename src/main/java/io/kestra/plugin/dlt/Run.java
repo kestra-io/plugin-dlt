@@ -88,6 +88,7 @@ import lombok.experimental.SuperBuilder;
                       - "zendesk_pipeline.duckdb"
                     script: |
                       import dlt
+import io.kestra.core.models.annotations.PluginProperty;
                       from zendesk import zendesk_support
 
                       pipeline = dlt.pipeline(
@@ -105,10 +106,12 @@ public class Run extends AbstractExecScript implements RunnableTask<ScriptOutput
     private static final String DEFAULT_IMAGE = "ghcr.io/kestra-io/dlt";
 
     @Builder.Default
+    @PluginProperty(group = "execution")
     protected Property<String> containerImage = Property.ofValue(DEFAULT_IMAGE);
 
     @Schema(title = "Inline script to execute")
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<String> script;
 
     @Override

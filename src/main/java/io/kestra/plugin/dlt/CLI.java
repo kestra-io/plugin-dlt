@@ -78,6 +78,7 @@ import lombok.experimental.SuperBuilder;
                     inputFiles:
                       rest_api.py: |
                         import dlt
+import io.kestra.core.models.annotations.PluginProperty;
                         from dlt.sources.rest_api import rest_api_source
 
                         def load_pokemon() -> None:
@@ -150,9 +151,11 @@ public class CLI extends AbstractExecScript implements RunnableTask<ScriptOutput
         description = "List of dlt CLI commands to execute. Common commands include 'dlt init', 'dlt pipeline', 'dlt deploy', etc."
     )
     @NotNull
+    @PluginProperty(group = "main")
     protected Property<List<String>> commands;
 
     @Builder.Default
+    @PluginProperty(group = "execution")
     protected Property<String> containerImage = Property.ofValue(DEFAULT_IMAGE);
 
     @Override

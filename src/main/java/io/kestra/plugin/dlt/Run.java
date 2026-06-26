@@ -28,7 +28,10 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode
 @Getter
 @NoArgsConstructor
-@Schema(title = "Run a dlt pipeline from Python code.")
+@Schema(
+    title = "Run a dlt pipeline from Python code",
+    description = "Executes an inline dlt Python script in a container to extract data from a source and load it into a destination."
+)
 @Plugin(
     examples = {
         @Example(
@@ -89,7 +92,6 @@ import lombok.experimental.SuperBuilder;
                       - "zendesk_pipeline.duckdb"
                     script: |
                       import dlt
-import io.kestra.core.models.annotations.PluginProperty;
                       from zendesk import zendesk_support
 
                       pipeline = dlt.pipeline(

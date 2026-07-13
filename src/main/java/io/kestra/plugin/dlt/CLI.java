@@ -26,7 +26,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Execute dlt (data load tool) commands to extract, and load data from various sources.",
+    title = "Execute dlt (data load tool) commands to extract, and load data from various sources",
     description = "dlt is an open-source Python library that loads data from various data sources into well-structured datasets. " +
         "It offers a lightweight interface for extracting data from REST APIs, SQL databases, cloud storage, Python data structures, and many more."
 )
@@ -79,7 +79,6 @@ import lombok.experimental.SuperBuilder;
                     inputFiles:
                       rest_api.py: |
                         import dlt
-import io.kestra.core.models.annotations.PluginProperty;
                         from dlt.sources.rest_api import rest_api_source
 
                         def load_pokemon() -> None:

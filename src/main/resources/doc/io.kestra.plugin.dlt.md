@@ -4,7 +4,7 @@ Run dlt (data load tool) pipelines from Kestra flows to extract and load data ac
 
 ## Authentication
 
-dlt pipelines authenticate to sources and destinations via environment variables. Pass credentials through the `env` map using dlt's nested variable convention (e.g. `SOURCES__<SOURCE>__<SECTION>__CREDENTIALS__<KEY>`). Store secrets in [secrets](https://kestra.io/docs/concepts/secret) and apply connection properties globally with [plugin defaults](https://kestra.io/docs/workflow-components/plugin-defaults).
+dlt pipelines authenticate to sources and destinations via environment variables. Pass credentials through the `env` map using dlt's nested variable convention (e.g. `SOURCES__<SOURCE>__<SECTION>__CREDENTIALS__<KEY>`). Store secrets in [secrets](https://kestra.io/docs/concepts/secret) and set connection properties on each task.
 
 ## Tasks
 

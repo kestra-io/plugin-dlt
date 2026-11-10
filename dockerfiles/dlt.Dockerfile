@@ -9,11 +9,11 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     GIT_PYTHON_REFRESH=quiet
 
 # Install system deps (includes git)
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
       git ca-certificates curl gcc build-essential \
  && rm -rf /var/lib/apt/lists/*
 
-RUN pip install uv && uv pip install --system "dlt[duckdb,cli]" \
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel uv && uv pip install --system "dlt[duckdb,cli]" \
     requests \
     pandas \
     pyarrow \

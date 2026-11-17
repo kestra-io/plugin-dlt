@@ -14,6 +14,7 @@ import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.scripts.exec.AbstractExecScript;
 import io.kestra.plugin.scripts.exec.scripts.models.DockerOptions;
 import io.kestra.plugin.scripts.exec.scripts.models.ScriptOutput;
+import io.kestra.plugin.scripts.exec.scripts.runners.CommandsWrapper;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -159,6 +160,11 @@ public class CLI extends AbstractExecScript implements RunnableTask<ScriptOutput
     @Override
     protected DockerOptions injectDefaults(RunContext runContext, DockerOptions original) throws IllegalVariableEvaluationException {
         return DltDockerDefaults.inject(runContext, original, this.getContainerImage());
+    }
+
+    @Override
+    protected CommandsWrapper commands(RunContext runContext) throws IllegalVariableEvaluationException {
+        return DltDockerDefaults.applyEntrypoint(super.commands(runContext));
     }
 
     @Override

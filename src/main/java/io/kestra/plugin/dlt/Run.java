@@ -122,6 +122,11 @@ public class Run extends AbstractExecScript implements RunnableTask<ScriptOutput
     }
 
     @Override
+    protected CommandsWrapper commands(RunContext runContext) throws IllegalVariableEvaluationException {
+        return DltDockerDefaults.applyEntrypoint(super.commands(runContext));
+    }
+
+    @Override
     public ScriptOutput run(RunContext runContext) throws Exception {
         CommandsWrapper commands = this.commands(runContext);
 

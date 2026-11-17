@@ -106,11 +106,9 @@ import lombok.experimental.SuperBuilder;
     }
 )
 public class Run extends AbstractExecScript implements RunnableTask<ScriptOutput> {
-    private static final String DEFAULT_IMAGE = "ghcr.io/kestra-io/dlt";
-
     @Builder.Default
     @PluginProperty(group = "execution")
-    protected Property<String> containerImage = Property.ofValue(DEFAULT_IMAGE);
+    protected Property<String> containerImage = Property.ofValue(DltDockerDefaults.DEFAULT_IMAGE);
 
     @Schema(title = "Inline script to execute")
     @NotNull
@@ -120,14 +118,7 @@ public class Run extends AbstractExecScript implements RunnableTask<ScriptOutput
     @Override
     protected DockerOptions injectDefaults(RunContext runContext, DockerOptions original)
         throws IllegalVariableEvaluationException {
-        var builder = original.toBuilder();
-        if (original.getImage() == null) {
-            builder.image(runContext.render(this.getContainerImage()).as(String.class).orElse(null));
-        }
-        if (original.getEntryPoint() == null || original.getEntryPoint().isEmpty()) {
-            builder.entryPoint(List.of(""));
-        }
-        return builder.build();
+        return DltDockerDefaults.inject(runContext, original, this.getContainerImage());
     }
 
     @Override

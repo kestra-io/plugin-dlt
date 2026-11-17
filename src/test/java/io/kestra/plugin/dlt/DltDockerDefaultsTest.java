@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.is;
 
 @KestraTest
 class DltDockerDefaultsTest {
-    private static final List<String> SCRIPT = List.of("/usr/local/bin/kestra-entrypoint.sh");
+    private static final List<String> SCRIPT = DltDockerDefaults.DEFAULT_IMAGE_ENTRYPOINT;
 
     @Inject
     RunContextFactory runContextFactory;

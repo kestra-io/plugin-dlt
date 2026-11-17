@@ -12,7 +12,16 @@ import io.kestra.plugin.scripts.runner.docker.Docker;
 
 final class DltDockerDefaults {
     static final String DEFAULT_IMAGE = "ghcr.io/kestra-io/dlt";
-    static final String DEFAULT_IMAGE_ENTRYPOINT = "/usr/local/bin/kestra-entrypoint.sh";
+    static final String ENTRYPOINT_SCRIPT = "/usr/local/bin/kestra-entrypoint.sh";
+    // Images published before the non-root change do not ship the script (and users may have one cached with
+    // IF_NOT_PRESENT), so fall back to running the task command directly instead of failing with "no such file".
+    // The runner passes the task command as Cmd, which reaches the wrapper as "$@"; the last item is $0.
+    static final List<String> DEFAULT_IMAGE_ENTRYPOINT = List.of(
+        "/bin/sh",
+        "-c",
+        "if [ -x " + ENTRYPOINT_SCRIPT + " ]; then exec " + ENTRYPOINT_SCRIPT + " \"$@\"; else exec \"$@\"; fi",
+        "kestra-entrypoint"
+    );
 
     private DltDockerDefaults() {}
 
@@ -36,7 +45,7 @@ final class DltDockerDefaults {
             return commands;
         }
 
-        return commands.withTaskRunner(docker.toBuilder().entryPoint(List.of(DEFAULT_IMAGE_ENTRYPOINT)).build());
+        return commands.withTaskRunner(docker.toBuilder().entryPoint(DEFAULT_IMAGE_ENTRYPOINT).build());
     }
 
     private static boolean hasDefaultEntryPoint(List<String> entryPoint) {
@@ -53,7 +62,7 @@ final class DltDockerDefaults {
         }
         if (original.getEntryPoint() == null || original.getEntryPoint().isEmpty()) {
             // Only the default image ships the entrypoint script; custom images keep the cleared entrypoint.
-            builder.entryPoint(isDefaultImage(image) ? List.of(DEFAULT_IMAGE_ENTRYPOINT) : List.of(""));
+            builder.entryPoint(isDefaultImage(image) ? DEFAULT_IMAGE_ENTRYPOINT : List.of(""));
         }
         return builder.build();
     }
